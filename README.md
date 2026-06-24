@@ -1,4 +1,4 @@
-# 🏋️ Gym Management System
+# Gym Management System
 
 A Java console application that lets you run a gym from your terminal — register members, track check-ins, renew memberships, and generate reports. Built with **Java** and **SQLite**, so all your data is saved in a local database file and survives between sessions.
 
