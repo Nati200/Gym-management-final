@@ -1,6 +1,7 @@
-package GYM.db;
+package GYM.Database;
 
 import GYM.exception.MemberNotFoundException;
+import GYM.exception.ExpiredMembershipException;
 import GYM.model.BasicMember;
 import GYM.model.Member;
 import GYM.model.PremiumMember;
@@ -11,28 +12,30 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
-// Chapter 7: JDBC - Connection, PreparedStatement, ResultSet
 public class DatabaseManager {
 
     private static final String URL = "jdbc:sqlite:gym.db";
     private Connection connection;
 
     public DatabaseManager() {
-        connect();
-        createTables();
+        try {
+            this.connection = DriverManager.getConnection("jdbc:sqlite:gym.db");
+
+            createTables();
+
+        } catch (SQLException e) {
+            System.out.println("Database connection failed: " + e.getMessage());
+        }
     }
 
-    // Chapter 7: Establish JDBC connection
     private void connect() {
         try {
             connection = DriverManager.getConnection(URL);
-            System.out.println("[DB] Connected to gym.db");
         } catch (SQLException e) {
             System.out.println("[DB] Connection failed: " + e.getMessage());
         }
     }
 
-    // Chapter 7: Create tables using Statement
     private void createTables() {
         String membersTable =
             "CREATE TABLE IF NOT EXISTS members (" +
@@ -60,7 +63,6 @@ public class DatabaseManager {
         }
     }
 
-    // Chapter 7: INSERT using PreparedStatement
     public boolean addMember(Member member) {
         String sql = "INSERT INTO members (name, phone, member_type, join_date, expiry_date, has_trainer) " +
                      "VALUES (?, ?, ?, ?, ?, ?)";
@@ -82,7 +84,7 @@ public class DatabaseManager {
             return false;
         }
     }
-[6/24/2026 11:38 AM] Aetos: // Chapter 7: SELECT all using Statement + ResultSet
+
     public List<Member> getAllMembers() {
         List<Member> members = new ArrayList<>();
         String sql = "SELECT * FROM members ORDER BY id";
@@ -97,7 +99,6 @@ public class DatabaseManager {
         return members;
     }
 
-    // Chapter 7: SELECT by ID using PreparedStatement
     public Member getMemberById(int id) throws MemberNotFoundException {
         String sql = "SELECT * FROM members WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -106,14 +107,13 @@ public class DatabaseManager {
             if (rs.next()) {
                 return mapRow(rs);
             } else {
-                throw new MemberNotFoundException(id);
+                throw new MemberNotFoundException(id); // Cleaned up
             }
         } catch (SQLException e) {
-            throw new MemberNotFoundException(id);
+            throw new MemberNotFoundException(id); // Cleaned up
         }
     }
 
-    // Chapter 7: UPDATE using PreparedStatement
     public boolean renewMembership(int id, LocalDate newExpiry) {
         String sql = "UPDATE members SET expiry_date = ? WHERE id = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -126,7 +126,6 @@ public class DatabaseManager {
         }
     }
 
-    // Chapter 7: INSERT check-in record
     public boolean checkIn(int memberId, String note) {
         String sql = "INSERT INTO checkins (member_id, checkin_time, note) VALUES (?, ?, ?)";
         String time = LocalDate.now() + " " + LocalTime.now().toString().substring(0, 8);
@@ -142,7 +141,6 @@ public class DatabaseManager {
         }
     }
 
-    // Chapter 7: SELECT with WHERE clause
     public List<String> getCheckInHistory(int memberId) {
         List<String> history = new ArrayList<>();
         String sql = "SELECT checkin_time, note FROM checkins WHERE member_id = ? ORDER BY checkin_time DESC";
@@ -160,7 +158,6 @@ public class DatabaseManager {
         }
         return history;
     }
-[6/24/2026 11:38 AM] Aetos: // Members expiring within N days
     public List<Member> getExpiringSoon(int days) {
         List<Member> members = new ArrayList<>();
         String sql = "SELECT * FROM members WHERE expiry_date <= ? AND expiry_date >= ?";
@@ -177,7 +174,6 @@ public class DatabaseManager {
         return members;
     }
 
-    // Map a ResultSet row to a Member object (upcasting — Chapter 4)
     private Member mapRow(ResultSet rs) throws SQLException {
         int id           = rs.getInt("id");
         String name      = rs.getString("name");
@@ -187,7 +183,6 @@ public class DatabaseManager {
         LocalDate expiry = LocalDate.parse(rs.getString("expiry_date"));
         boolean trainer  = rs.getInt("has_trainer") == 1;
 
-        // Chapter 4: Upcasting — returning subclass as Member reference
         if ("BASIC".equals(type)) {
             return new BasicMember(id, name, phone, join, expiry);
         } else {

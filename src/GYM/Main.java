@@ -1,8 +1,8 @@
 package GYM;
 
-import GYM.db.DatabaseManager;
-import GYM.exception.ExpiredMembershipException;
 import GYM.exception.MemberNotFoundException;
+import GYM.Database.DatabaseManager;
+import GYM.exception.ExpiredMembershipException;
 import GYM.model.BasicMember;
 import GYM.model.Member;
 import GYM.model.PremiumMember;
@@ -12,20 +12,19 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 
-public class GymApp {
+public class Main {
 
     private static DatabaseManager db;
     private static ReportGenerator reportGen;
     private static Scanner scanner;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception{
 
         db        = new DatabaseManager();
         reportGen = new ReportGenerator();
         scanner   = new Scanner(System.in);
 
-        System.out.println("\n==========================================");
-        System.out.println("     WELCOME TO FITLIFE GYM MANAGER      ");
+        System.out.println("     WELCOME TO GYM MANAGER      ");
         System.out.println("==========================================");
 
         boolean running = true;
@@ -55,7 +54,6 @@ public class GymApp {
     }
 
     static void printMenu() {
-        System.out.println("\n==========================================");
         System.out.println("              MAIN MENU");
         System.out.println("==========================================");
         System.out.println(" 1. Register New Member");
@@ -128,7 +126,7 @@ public class GymApp {
         System.out.println("\nTotal: " + members.size() + " member(s)");
     }
 
-    static void checkInMember() {
+    static void checkInMember() throws MemberNotFoundException {
         System.out.println("\n--- MEMBER CHECK-IN ---");
         int id = getIntInput("Enter Member ID: ");
 
@@ -148,15 +146,10 @@ public class GymApp {
                 System.out.println("Check-in successful! Welcome, " + member.getName() + "!");
             }
 
-        } catch (MemberNotFoundException e) {
-            // Chapter 5: catching custom exception
-            System.out.println("[Error] " + e.getMessage());
-
-        } catch (ExpiredMembershipException e) {
-            // Chapter 5: catching another custom exception
-            System.out.println("[Error] " + e.getMessage());
-            System.out.println("Use Option 4 to renew.");
-        }
+         } catch (MemberNotFoundException _) {
+    } catch (ExpiredMembershipException e) {
+        System.out.println("Membership has expired: " + e.getMessage());
+    }
     }
 
     static void renewMembership() {
@@ -183,8 +176,9 @@ public class GymApp {
                 System.out.println("Renewal cancelled.");
             }
 
-        } catch (MemberNotFoundException e) {
-            System.out.println("[Error] " + e.getMessage());
+        } catch (MemberNotFoundException e) { // 👈 Make sure there is no dot prefix here!
+            System.out.println("⚠️ Member wasn't found: " + e.getMessage());
+
         }
     }
 
@@ -210,13 +204,15 @@ public class GymApp {
             }
 
         } catch (MemberNotFoundException e) {
-            System.out.println("[Error] " + e.getMessage());
-        }
+        System.out.println("⚠️ Member wasn't found: " + e.getMessage());
+
     }
+    }
+
 
     static void viewExpiringSoon() {
         System.out.println("\n--- EXPIRING IN NEXT 7 DAYS ---");
-        List<Member> members = db.getExpiringSoon(7);
+        List<Member> members = Main.db.getExpiringSoon(7);
 
         if (members.isEmpty()) {
             System.out.println("No memberships expiring in the next 7 days.");
@@ -230,21 +226,21 @@ public class GymApp {
 
     static void generateReport() {
         System.out.println("\n--- GENERATING REPORT ---");
-        List<Member> members = db.getAllMembers();
+        List<Member> members = Main.db.getAllMembers();
 
         if (members.isEmpty()) {
             System.out.println("No members to report.");
             return;
         }
 
-        reportGen.generateMembershipReport(members);
+        Main.reportGen.generateMembershipReport(members);
     }
 
     static int getIntInput(String prompt) {
         while (true) {
             System.out.print(prompt);
             try {
-                return Integer.parseInt(scanner.nextLine().trim());
+                return Integer.parseInt(Main.scanner.nextLine().trim());
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a number.");
             }

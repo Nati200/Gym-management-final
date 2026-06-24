@@ -46,7 +46,7 @@ public class ReportGenerator {
                 else                                     premium++;
                 if (m.isExpired())                       expired++;
             }
-[6/24/2026 11:41 AM] Aetos: writer.newLine();
+writer.newLine();
             writer.write("-------------------------------------------------");
             writer.newLine();
             writer.write("SUMMARY");
