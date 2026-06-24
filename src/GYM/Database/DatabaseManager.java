@@ -1,9 +1,9 @@
 package GYM.db;
 
-import gym.exception.MemberNotFoundException;
-import gym.model.BasicMember;
-import gym.model.Member;
-import gym.model.PremiumMember;
+import GYM.exception.MemberNotFoundException;
+import GYM.model.BasicMember;
+import GYM.model.Member;
+import GYM.model.PremiumMember;
 
 import java.sql.*;
 import java.time.LocalDate;
