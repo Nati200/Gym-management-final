@@ -1,6 +1,6 @@
-package gym.exception;
+package GYM.exception;
 
-
+// Chapter 5: Custom checked exception
 public class ExpiredMembershipException extends Exception {
 
     private int memberId;

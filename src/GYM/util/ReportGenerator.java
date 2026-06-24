@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-
+// Chapter 6: File I/O using BufferedWriter and BufferedReader
 public class ReportGenerator {
 
     private static final String REPORT_DIR = "reports/";
@@ -46,7 +46,7 @@ public class ReportGenerator {
                 else                                     premium++;
                 if (m.isExpired())                       expired++;
             }
-            writer.newLine();
+[6/24/2026 11:41 AM] Aetos: writer.newLine();
             writer.write("-------------------------------------------------");
             writer.newLine();
             writer.write("SUMMARY");
